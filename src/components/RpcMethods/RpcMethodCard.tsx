@@ -18,6 +18,7 @@ import {
   InputLeftAddon,
   VStack,
 } from '@chakra-ui/react';
+import { ProviderInterface } from '@coinbase/wallet-sdk-4.0.4';
 import React, { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 
@@ -39,18 +40,29 @@ export function RpcMethodCard({ format, method, params, shortcuts }) {
     formState: { errors },
   } = useForm();
 
-  const verify = useCallback(async (response: ResponseType, data: Record<string, string>) => {
-    const verifyResult = verifySignMsg({
-      method,
-      from: data.address?.toLowerCase(),
-      sign: response,
-      message: data.message,
-    });
-    if (verifyResult) {
-      setVerifyResult(verifyResult);
-      return;
-    }
-  }, []);
+  const verify = useCallback(
+    async (response: ResponseType, data: Record<string, string>) => {
+      const chainId = await (provider as ProviderInterface)?.request({ method: 'eth_chainId' });
+
+      if (!chainId) {
+        console.warn('Could not load chain ID from provider');
+        return;
+      }
+
+      const verifyResult = await verifySignMsg({
+        method,
+        from: data.address,
+        sign: response,
+        message: data.message,
+        chainId: parseInt(chainId as string, 16),
+      });
+      if (verifyResult) {
+        setVerifyResult(verifyResult);
+        return;
+      }
+    },
+    [provider]
+  );
 
   const submit = useCallback(
     async (data: Record<string, string>) => {
@@ -61,7 +73,7 @@ export function RpcMethodCard({ format, method, params, shortcuts }) {
       let values = data;
       if (format) {
         // fill active address to the request
-        const addresses = await provider.request({ method: 'eth_accounts' });
+        const addresses = [await provider.request({ method: 'eth_accounts' })];
         for (const key in data) {
           if (Object.prototype.hasOwnProperty.call(data, key)) {
             if (data[key] === ADDR_TO_FILL) {
@@ -76,7 +88,6 @@ export function RpcMethodCard({ format, method, params, shortcuts }) {
         if (!provider?.connected) {
           await provider.enable();
         }
-
         const response = await provider.request({
           method,
           params: values,

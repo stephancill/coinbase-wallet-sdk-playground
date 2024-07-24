@@ -32,8 +32,11 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    provider?.on('connect', () => {
+    provider?.on('connect', (data) => {
       setConnected(true);
+      if (data.chainId) {
+        setChainId(parseInt(data.chainId, 16));
+      }
     });
     provider?.on('chainChanged', (newChainId) => {
       setChainId(newChainId);

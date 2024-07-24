@@ -1,6 +1,9 @@
 import { CoinbaseWalletSDK as CoinbaseWalletSDK372 } from '@coinbase/wallet-sdk-3.7.2';
 import { CoinbaseWalletSDK as CoinbaseWalletSDK393 } from '@coinbase/wallet-sdk-3.9.3';
-import { CoinbaseWalletSDK as CoinbaseWalletSDK404 } from '@coinbase/wallet-sdk-4.0.4';
+import {
+  CoinbaseWalletSDK as CoinbaseWalletSDK404,
+  ProviderInterface,
+} from '@coinbase/wallet-sdk-4.0.4';
 import React, { useEffect, useMemo } from 'react';
 
 type CBWSDKProviderProps = {
@@ -44,7 +47,7 @@ export function CBWSDKReactContextProvider({ children }: CBWSDKProviderProps) {
   const [version, setVersion] = React.useState<SDKVersionType | undefined>(undefined);
   const [option, setOption] = React.useState<OptionsType | undefined>(undefined);
   const [sdk, setSdk] = React.useState(null);
-  const [provider, setProvider] = React.useState(null);
+  const [provider, setProvider] = React.useState<ProviderInterface>(null);
   const [scwUrl, setScwUrl] = React.useState<ScwUrlType | undefined>(undefined);
 
   useEffect(() => {
@@ -76,7 +79,7 @@ export function CBWSDKReactContextProvider({ children }: CBWSDKProviderProps) {
     if (version === '4.0.4') {
       cbwsdk = new CoinbaseWalletSDK404({
         appName: 'SDK Playground',
-        appChainIds: [84532, 8452],
+        appChainIds: [8453, 84532, 11155111],
       });
       preference = { options: option };
       setSdk(cbwsdk);

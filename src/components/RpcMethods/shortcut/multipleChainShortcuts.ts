@@ -8,6 +8,12 @@ const walletSwitchEthereumChainShortcuts: ShortcutType[] = [
     },
   },
   {
+    key: 'Sepolia',
+    data: {
+      chainId: '11155111',
+    },
+  },
+  {
     key: 'Base',
     data: {
       chainId: '8453',

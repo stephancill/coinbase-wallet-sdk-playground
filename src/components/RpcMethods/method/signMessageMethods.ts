@@ -1,11 +1,12 @@
 import {
   MessageTypes,
-  recoverPersonalSignature,
   recoverTypedSignature,
   SignTypedDataVersion,
   TypedDataV1,
   TypedMessage,
 } from '@metamask/eth-sig-util';
+import { createPublicClient, http } from 'viem';
+import * as chains from 'viem/chains';
 
 import { parseMessage } from '../shortcut/ShortcutType';
 import { RpcRequestInput } from './RpcRequestInput';
@@ -69,28 +70,36 @@ export const signMessageMethods = [
   ethSignTypedDataV4,
 ];
 
-export const verifySignMsg = ({
+export const verifySignMsg = async ({
   method,
   from,
   sign,
   message,
+  chainId,
 }: {
   method: string;
   from: string;
   sign: string;
   message: unknown;
+  chainId?: number;
 }) => {
+  const chain = Object.values(chains).find((chain) => chain.id === chainId) || chains.mainnet;
+
+  const publicClient = createPublicClient({
+    chain: chain as chains.Chain,
+    transport: http(),
+  });
   switch (method) {
     case 'personal_sign': {
-      const msg = `0x${Buffer.from(message as string, 'utf8').toString('hex')}`;
-      const recoveredAddr = recoverPersonalSignature({
-        data: msg,
-        signature: sign,
+      const verifyResult = await publicClient.verifyMessage({
+        address: from as `0x${string}`,
+        message: message as string,
+        signature: sign as `0x${string}`,
       });
-      if (recoveredAddr === from) {
-        return `SigUtil Successfully verified signer as ${recoveredAddr}`;
+      if (verifyResult) {
+        return `SigUtil Successfully verified signer as ${from}`;
       } else {
-        return `SigUtil Failed to verify signer when comparing ${recoveredAddr} to ${from}`;
+        return `SigUtil Failed to verify signer`;
       }
     }
     case 'eth_signTypedData_v1': {
@@ -118,15 +127,16 @@ export const verifySignMsg = ({
       }
     }
     case 'eth_signTypedData_v4': {
-      const recoveredAddr = recoverTypedSignature({
-        data: message as TypedMessage<MessageTypes>,
-        signature: sign,
-        version: SignTypedDataVersion.V4,
+      const verifyResult = await publicClient.verifyTypedData({
+        address: from as `0x${string}`,
+        ...(message as any),
+        signature: sign as `0x${string}`,
       });
-      if (recoveredAddr === from) {
-        return `SigUtil Successfully verified signer as ${recoveredAddr}`;
+
+      if (verifyResult) {
+        return `SigUtil Successfully verified signer as ${from}`;
       } else {
-        return `SigUtil Failed to verify signer when comparing ${recoveredAddr} to ${from}`;
+        return `SigUtil Failed to verify signer`;
       }
     }
     default:
