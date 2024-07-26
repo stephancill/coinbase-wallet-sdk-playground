@@ -166,13 +166,6 @@ export function RpcMethodCard({ format, method, params, shortcuts }) {
             </Accordion>
           </>
         )}
-        {response && (
-          <VStack mt={4}>
-            <Code as="pre" p={4} wordBreak="break-word" whiteSpace="pre-wrap" w="100%">
-              {JSON.stringify(response, null, 2)}
-            </Code>
-          </VStack>
-        )}
         {verifyResult && (
           <VStack mt={4}>
             <Code
@@ -198,6 +191,13 @@ export function RpcMethodCard({ format, method, params, shortcuts }) {
               w="100%"
             >
               {JSON.stringify(error, null, 2)}
+            </Code>
+          </VStack>
+        )}
+        {response && (
+          <VStack mt={4}>
+            <Code as="pre" p={4} wordBreak="break-word" whiteSpace="pre-wrap" w="100%">
+              {JSON.stringify(response, null, 2)}
             </Code>
           </VStack>
         )}
