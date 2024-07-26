@@ -73,7 +73,7 @@ export function RpcMethodCard({ format, method, params, shortcuts }) {
       let values = data;
       if (format) {
         // fill active address to the request
-        const addresses = [await provider.request({ method: 'eth_accounts' })];
+        const addresses = await provider.request({ method: 'eth_accounts' });
         for (const key in data) {
           if (Object.prototype.hasOwnProperty.call(data, key)) {
             if (data[key] === ADDR_TO_FILL) {
